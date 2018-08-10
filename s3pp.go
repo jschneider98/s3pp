@@ -1,8 +1,6 @@
 package s3pp
 
 import (
-	//"fmt"
-	//"bytes"
 	"time"
 	"encoding/base64"
 	"encoding/json"
@@ -13,8 +11,10 @@ import (
 
 //
 type AwsPostPolicy struct {
+	elements [17]string
 	dateStamp string
 	options *AwsPostPolicyOptions
+	ConditionMap map[string][3]string `json:"-"`
 	Expiration string `json:"expiration"`
 	Conditions [][]string `json:"conditions"`
 }
@@ -29,6 +29,8 @@ func CreateAwsPostPolicy (options *AwsPostPolicyOptions) (*AwsPostPolicy, error)
 
 	policy := &AwsPostPolicy{}
 	policy.options = options
+	policy.ConditionMap = make(map[string][3]string)
+	policy.initElements()
 
 	now := time.Now().UTC()
 	later := now.Add(options.Duration)
@@ -37,6 +39,14 @@ func CreateAwsPostPolicy (options *AwsPostPolicyOptions) (*AwsPostPolicy, error)
 	policy.dateStamp = now.Format("20060102")
 
 	return policy, nil
+}
+
+//
+func (p *AwsPostPolicy) SetCondition(operator string, element string, value string) [3]string{
+	condition := [3]string{operator, "$" + element, value}
+	p.ConditionMap[element] = condition
+
+	return condition
 }
 
 //
@@ -89,4 +99,25 @@ func (p *AwsPostPolicy) HmacSha256(key []byte, data []byte) []byte {
 	mac.Write(data)
 
 	return mac.Sum(nil)
+}
+
+//
+func (p *AwsPostPolicy) initElements() {
+	p.elements[0] = "acl"
+	p.elements[1] = "content-length-range"
+	p.elements[2] = "cache-control"
+	p.elements[3] = "content-type"
+	p.elements[4] = "content-disposition"
+	p.elements[5] = "content-encoding"
+	p.elements[6] = "expires"
+	p.elements[7] = "key"
+	p.elements[8] = "success_action_redirect"
+	p.elements[9] = "redirect"
+	p.elements[10] = "success_action_status"
+	p.elements[11] = "x-amz-algorithm"
+	p.elements[12] = "x-amz-credential"
+	p.elements[13] = "x-amz-date"
+	p.elements[14] = "x-amz-security-token"
+	p.elements[15] = "x-amz-meta-*"
+	p.elements[16] = "x-amz-*"
 }
