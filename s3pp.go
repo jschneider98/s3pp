@@ -17,7 +17,7 @@ type AwsPostPolicy struct {
 	options *AwsPostPolicyOptions
 	ConditionMap map[string][3]string `json:"-"`
 	Expiration string `json:"expiration"`
-	Conditions [][]string `json:"conditions"`
+	Conditions [][3]string `json:"conditions"`
 }
 
 //
@@ -54,6 +54,21 @@ func (p *AwsPostPolicy) SetCondition(operator string, element string, value stri
 
 //
 func (p *AwsPostPolicy) GetJsonPolicy() ([]byte, error) {
+	p.Conditions = make([][3]string, 0)
+	p.Conditions = append(p.Conditions, [3]string{"eq", "$bucket", p.options.Bucket})
+
+	for _, element := range p.elements {
+
+		if val, ok := p.ConditionMap[element]; ok {
+			p.Conditions = append(p.Conditions, val)
+		}
+	}
+
+	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-meta-uuid", "14365123651274"})
+	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-credential", p.options.Id + "/" + p.dateStamp + "/" + p.options.Region + "/s3/aws4_request"})
+	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-algorithm", "AWS4-HMAC-SHA256"})
+	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-date", p.dateStamp + "T000000Z"})
+
 	return json.Marshal(p)
 }
 
