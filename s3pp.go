@@ -13,21 +13,25 @@ import (
 
 //
 type AwsPostPolicy struct {
-	id string
-	secret string
-	bucket string
-	region string
 	dateStamp string
-	duration time.Duration
+	options *AwsPostPolicyOptions
 	Expiration string `json:"expiration"`
 	Conditions [][]string `json:"conditions"`
 }
 
 //
-func CreateAwsPostPolicy (id string, secret string, bucket string, region string, duration time.Duration) (*AwsPostPolicy, error) {
+func CreateAwsPostPolicy (options *AwsPostPolicyOptions) (*AwsPostPolicy, error) {
+	err := options.IsValid()
+
+	if err != nil {
+		return nil, err
+	}
+
 	policy := &AwsPostPolicy{}
+	policy.options = options
+
 	now := time.Now().UTC()
-	later := now.Add(duration)
+	later := now.Add(options.Duration)
 
 	policy.Expiration = later.Format(time.RFC3339)
 	policy.dateStamp = now.Format("20060102")
@@ -42,7 +46,7 @@ func (p *AwsPostPolicy) GetJsonPolicy() ([]byte, error) {
 
 //
 func (p *AwsPostPolicy) GetBase64Policy() (string, error) {
-	jsonPolicy, err := json.Marshal(p)
+	jsonPolicy, err := p.GetJsonPolicy()
 
 	if err != nil {
 		return "", err
@@ -70,9 +74,9 @@ func (p *AwsPostPolicy) GetS3Signature() (string, error) {
 //
 func (p *AwsPostPolicy) GetS3SignatureKey() []byte {
 
-	secret := "AWS4" + p.secret
+	secret := "AWS4" + p.options.Secret
 	dateKey := p.HmacSha256([]byte(secret), []byte(p.dateStamp))
-	dateRegionKey := p.HmacSha256(dateKey, []byte(p.region))
+	dateRegionKey := p.HmacSha256(dateKey, []byte(p.options.Region))
 	dateRegionServiceKey := p.HmacSha256(dateRegionKey, []byte("s3"))
 	signingKey := p.HmacSha256(dateRegionServiceKey, []byte("aws4_request"))
 
