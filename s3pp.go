@@ -2,6 +2,7 @@ package s3pp
 
 import (
 	"time"
+	"strings"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/hex"
@@ -42,7 +43,9 @@ func CreateAwsPostPolicy (options *AwsPostPolicyOptions) (*AwsPostPolicy, error)
 }
 
 //
-func (p *AwsPostPolicy) SetCondition(operator string, element string, value string) [3]string{
+func (p *AwsPostPolicy) SetCondition(operator string, element string, value string) [3]string {
+	element = strings.ToLower(element)
+
 	condition := [3]string{operator, "$" + element, value}
 	p.ConditionMap[element] = condition
 
