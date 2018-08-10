@@ -36,6 +36,9 @@ func setTestPolicy() (*AwsPostPolicy) {
 	testPolicy.Expiration = later.Format(time.RFC3339)
 	testPolicy.dateStamp = now.Format("20060102")
 
+	testPolicy.SetCondition("eq", "acl", "private")
+	testPolicy.SetCondition("eq", "key", "user/")
+
 	return testPolicy
 }
 
@@ -49,7 +52,11 @@ func TestGetJsonPolicy(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(string(policy[:]))
+	match := "{\"expiration\":\"2009-11-10T23:01:00Z\",\"conditions\":[[\"eq\",\"$bucket\",\"aws-bucket\"],[\"eq\",\"$acl\",\"private\"],[\"eq\",\"$key\",\"user/\"],[\"eq\",\"$x-amz-meta-uuid\",\"14365123651274\"],[\"eq\",\"$x-amz-credential\",\"aws-id/20091110/aws-region/s3/aws4_request\"],[\"eq\",\"$x-amz-algorithm\",\"AWS4-HMAC-SHA256\"],[\"eq\",\"$x-amz-date\",\"20091110T000000Z\"]]}"
+
+	if string(policy[:]) != match {
+		t.Errorf("Invalid JSON policy. Expected: '%v' Got: '%v'\n", match, string(policy[:]))
+	}
 }
 
 //
