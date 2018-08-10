@@ -105,3 +105,16 @@ func TestGetS3Signature(t *testing.T) {
 		t.Errorf("Hash mismatch. Expected: '%v' Got: '%v'\n", match, hash)
 	}
 }
+
+//
+func TestSetCondition(t *testing.T) {
+	setTestPolicy()
+
+	orig := [3]string{"eq", "$key", "user/"}
+
+	new := testPolicy.SetCondition(orig[0], "key", orig[2])
+
+	if new != orig {
+		t.Errorf("Array mismatch. Expected: '%v' Got: '%v'\n", orig, new)
+	}
+}
