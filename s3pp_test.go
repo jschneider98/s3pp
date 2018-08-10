@@ -19,7 +19,15 @@ func setTestPolicy() (*AwsPostPolicy) {
 	now := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 	later := now.Add(time.Minute)
 
-	testPolicy, err = CreateAwsPostPolicy("aws-id", "aws-secret", "aws-bucket", "aws-region", time.Minute)
+	options := CreateAwsPostPolicyOptions(
+		"aws-id",
+		"aws-secret",
+		"aws-bucket",
+		"aws-region",
+		time.Minute,
+	)
+
+	testPolicy, err = CreateAwsPostPolicy(options)
 
 	if err != nil {
 		panic("Failed to create test policy")
@@ -74,7 +82,7 @@ func TestGetS3SignatureKey(t *testing.T) {
 	setTestPolicy()
 
 	hash := testPolicy.GetS3SignatureKey()
-	match := []byte{157, 222, 27, 216, 60, 230, 213, 206, 134, 80, 6, 121, 254, 203, 23, 72, 118, 153, 160, 241, 239, 11, 244, 156, 85, 35, 5, 122, 53, 92, 53, 238}
+	match := []byte{24, 197, 170, 253, 7, 13, 35, 65, 255, 180, 168, 133, 14, 15, 155, 251, 143, 226, 131, 205, 219, 18, 235, 154, 81, 84, 117, 136, 49, 63, 210, 240}
 
 	if (string(hash) != string(match)) {
 		t.Errorf("Hash mismatch. Expected: '%v' Got: '%v'\n", match, hash)
@@ -91,7 +99,7 @@ func TestGetS3Signature(t *testing.T) {
 		t.Error(err)
 	}
 
-	match := "f7b45fcdf20c933b7a3bc3a0e198b294146a4d339a58dbadb196ae45750ce024"
+	match := ""
 
 	if (string(hash) != string(match)) {
 		t.Errorf("Hash mismatch. Expected: '%v' Got: '%v'\n", match, hash)
