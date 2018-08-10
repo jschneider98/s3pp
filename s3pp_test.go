@@ -3,7 +3,6 @@ package s3pp
 import (
 	"testing"
 	"time"
-	"fmt"
 )
 
 var testPolicy *AwsPostPolicy
@@ -69,7 +68,11 @@ func TestGetBase64Policy(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(policy)
+	match := "eyJleHBpcmF0aW9uIjoiMjAwOS0xMS0xMFQyMzowMTowMFoiLCJjb25kaXRpb25zIjpbWyJlcSIsIiRidWNrZXQiLCJhd3MtYnVja2V0Il0sWyJlcSIsIiRhY2wiLCJwcml2YXRlIl0sWyJlcSIsIiRrZXkiLCJ1c2VyLyJdLFsiZXEiLCIkeC1hbXotbWV0YS11dWlkIiwiMTQzNjUxMjM2NTEyNzQiXSxbImVxIiwiJHgtYW16LWNyZWRlbnRpYWwiLCJhd3MtaWQvMjAwOTExMTAvYXdzLXJlZ2lvbi9zMy9hd3M0X3JlcXVlc3QiXSxbImVxIiwiJHgtYW16LWFsZ29yaXRobSIsIkFXUzQtSE1BQy1TSEEyNTYiXSxbImVxIiwiJHgtYW16LWRhdGUiLCIyMDA5MTExMFQwMDAwMDBaIl1dfQ=="
+
+	if policy != match {
+		t.Errorf("Invalid base64Policy. Expected: '%v' Got: '%v'\n", match, policy)
+	}
 }
 
 //
@@ -106,7 +109,7 @@ func TestGetS3Signature(t *testing.T) {
 		t.Error(err)
 	}
 
-	match := ""
+	match := "132dc9269812ba71ca9776ae8fa84a79f0a7dafb1b65fdb09c171e110532f3dd"
 
 	if (string(hash) != string(match)) {
 		t.Errorf("Hash mismatch. Expected: '%v' Got: '%v'\n", match, hash)
