@@ -53,7 +53,7 @@ func (p *AwsPostPolicy) SetCondition(operator string, element string, value stri
 }
 
 //
-func (p *AwsPostPolicy) GetJsonPolicy() ([]byte, error) {
+func (p * AwsPostPolicy) GetConditions () [][3]string {
 	p.Conditions = make([][3]string, 0)
 	p.Conditions = append(p.Conditions, [3]string{"eq", "$bucket", p.options.Bucket})
 
@@ -68,6 +68,13 @@ func (p *AwsPostPolicy) GetJsonPolicy() ([]byte, error) {
 	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-credential", p.options.Id + "/" + p.dateStamp + "/" + p.options.Region + "/s3/aws4_request"})
 	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-algorithm", "AWS4-HMAC-SHA256"})
 	p.Conditions = append(p.Conditions, [3]string{"eq", "$x-amz-date", p.dateStamp + "T000000Z"})
+
+	return p.Conditions
+}
+
+//
+func (p *AwsPostPolicy) GetJsonPolicy() ([]byte, error) {
+	p.GetConditions()
 
 	return json.Marshal(p)
 }
